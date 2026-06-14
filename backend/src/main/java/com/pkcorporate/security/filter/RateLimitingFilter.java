@@ -133,6 +133,13 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         // Use the LAST IP in the chain — the one appended by the trusted reverse proxy.
         // The first IP is client-supplied and can be easily spoofed.
         String[] ips = xfHeader.split(",");
-        return ips[ips.length - 1].trim();
+        if (ips == null || ips.length == 0) {
+            return request.getRemoteAddr();
+        }
+        String clientIP = ips[ips.length - 1].trim();
+        if (clientIP.isBlank()) {
+            return request.getRemoteAddr();
+        }
+        return clientIP;
     }
 }
