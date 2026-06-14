@@ -23,7 +23,7 @@ public class CorsFilterConfig implements Filter {
 
     private final Set<String> allowedOrigins;
 
-    public CorsFilterConfig(@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173}") String[] origins) {
+    public CorsFilterConfig(@Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173,https://frontend-phi-lemon-czqwlgh8ug.vercel.app,https://pkfrontend.vercel.app}") String[] origins) {
         this.allowedOrigins = Arrays.stream(origins)
                 .map(String::trim)
                 .collect(Collectors.toSet());
