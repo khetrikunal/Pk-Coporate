@@ -1,0 +1,2 @@
+push frontend to https://github.com/sherryfps/pkfrontend.git
+push backend with backend folder and render.yaml to https://github.com/khetrikunal/Pk-Coporate.git

@@ -106,7 +106,7 @@ export default function CreateId({ role }: Props) {
       const payload: CreateUserRequest = {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
-        phoneNumber: formData.phoneNumber.trim(),
+        phoneNumber: formData.phoneNumber.replace(/\D/g, ''),
         gender: formData.gender,
         password: formData.password,
         role,
