@@ -149,7 +149,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream()
+        return productRepository.findAllWithCollections().stream()
                 .map(this::toResponse)
                 .toList();
     }

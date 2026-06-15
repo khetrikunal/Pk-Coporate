@@ -3,6 +3,7 @@ package com.pkcorporate.repository;
 import com.pkcorporate.entity.TShirtProduct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,15 @@ import java.util.UUID;
 @Repository
 public interface TShirtProductRepository extends JpaRepository<TShirtProduct, UUID> {
     Optional<TShirtProduct> findByProductCode(String productCode);
+
+    @EntityGraph(attributePaths = {"images", "availableColors", "availableSizes", "printTypes"})
+    @Query("SELECT DISTINCT p FROM TShirtProduct p WHERE p.active = true")
     List<TShirtProduct> findByActiveTrue();
+
+    @EntityGraph(attributePaths = {"images", "availableColors", "availableSizes", "printTypes"})
+    @Query("SELECT DISTINCT p FROM TShirtProduct p")
+    List<TShirtProduct> findAllWithCollections();
+
     List<TShirtProduct> findByCategoryAndActiveTrue(String category);
     List<TShirtProduct> findByFabricTypeAndActiveTrue(String fabricType);
 

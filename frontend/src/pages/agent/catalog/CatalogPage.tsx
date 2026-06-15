@@ -24,17 +24,23 @@ interface ProductImageResponse {
 
 interface Product {
   id: string;
+  productCode: string;
   name: string;
   description: string;
+  brand: string;
+  category: string;
+  fabric: string;
+  gsm: string;
+  neckType: string;
+  sleeveType: string;
   basePrice: number;
   discountPrice?: number;
   effectivePrice: number;
-  brand: string;
-  category: string;
   minimumOrderQuantity: number;
   stockQuantity: number;
-  availableColors?: string[];
-  availableSizes?: string[];
+  availableColors: string[];
+  availableSizes: string[];
+  printTypes: string[];
   active: boolean;
   images: ProductImageResponse[];
 }
@@ -345,7 +351,7 @@ function ProductModal({ product, onClose, onAddToCart }: {
               <div>
                 <p className="label mb-2">Color</p>
                 <div className="flex flex-wrap gap-2">
-                  {product.colors.map(c => (
+                  {(product.availableColors ?? []).map(c => (
                     <button key={c} type="button" onClick={() => setColor(c)}
                       className={`w-9 h-9 rounded-xl border-2 transition-all ${color === c ? 'border-primary-500 scale-110 shadow-md' : 'border-gray-200 dark:border-gray-700 hover:scale-105'}`}
                       style={{ background: c }} title={c}
@@ -370,7 +376,7 @@ function ProductModal({ product, onClose, onAddToCart }: {
 
             {/* Right: sizes, upload, notes, price */}
             <div className="p-5 space-y-5">
-              <SizeQtyPicker availableSizes={product.sizes} sizeQtys={sizeQtys} onChange={setSizeQtys} />
+              <SizeQtyPicker availableSizes={product.availableSizes ?? []} sizeQtys={sizeQtys} onChange={setSizeQtys} />
               <PhotoUploader photos={photos} onChange={setPhotos} />
               <div>
                 <label className="label mb-2">Special Instructions <span className="text-gray-400 font-normal">(optional)</span></label>
@@ -404,7 +410,7 @@ function ProductModal({ product, onClose, onAddToCart }: {
           <button onClick={handleAdd} disabled={!canAdd}
             className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <ShoppingCart size={16} />
-            {canAdd ? `Add to Cart · ${formatINR(subtotal)}` : `Need ${product.moq - total} more pcs (${total}/${product.moq})`}
+            {canAdd ? `Add to Cart · ${formatINR(subtotal)}` : `Need ${product.minimumOrderQuantity - total} more pcs (${total}/${product.minimumOrderQuantity})`}
           </button>
         </div>
       </motion.div>
@@ -445,7 +451,7 @@ function CartDrawer({ cart, customer, setCustomer, onClose, onRemove, onClearCar
       const payload = {
         customerId: customer,
         items: cart.map(item => ({
-          productId: item.product.dbId!,
+          productId: item.product.id,
           colorHex: item.color,
           colorName: item.color,
           printType: item.printType,
@@ -535,7 +541,7 @@ function CartDrawer({ cart, customer, setCustomer, onClose, onRemove, onClearCar
                 {cart.map((item, i) => (
                   <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 space-y-3">
                     <div className="flex items-start gap-3">
-                      <img src={item.product.images[0]} alt={item.product.name} className="w-12 h-12 rounded-xl object-contain bg-white dark:bg-gray-700 p-1 border border-gray-100 dark:border-gray-700 shrink-0" />
+                      <img src={item.product.images[0]?.imageUrl} alt={item.product.name} className="w-12 h-12 rounded-xl object-contain bg-white dark:bg-gray-700 p-1 border border-gray-100 dark:border-gray-700 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-gray-900 dark:text-white leading-tight truncate">{item.product.name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
@@ -553,7 +559,7 @@ function CartDrawer({ cart, customer, setCustomer, onClose, onRemove, onClearCar
                       ))}
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">{totalQty(item.sizeQtys)} pcs × {formatINR(item.product.price)}</span>
+                      <span className="text-gray-500">{totalQty(item.sizeQtys)} pcs × {formatINR(item.product.effectivePrice)}</span>
                       <span className="font-black text-gray-900 dark:text-white">{formatINR(itemTotal(item))}</span>
                     </div>
                     {item.uploadedPhotos.length > 0 && (
@@ -788,7 +794,7 @@ const [selectedGSM, setSelectedGSM] = useState('All');
               className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-card-hover hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 group flex flex-col">
               {/* Card image — shows first image; hover reveals "View X photos" button */}
               <div className="relative bg-gray-50 dark:bg-gray-800 aspect-square flex items-center justify-center p-5 overflow-hidden">
-                <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+                <img src={product.images[0]?.imageUrl} alt={product.name} className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                   <button onClick={() => setConfigProduct(product)}
@@ -817,14 +823,14 @@ const [selectedGSM, setSelectedGSM] = useState('All');
                   <span className="badge badge-neutral text-[10px]">{product.gsm}</span>
                 </div>
                 <div className="flex items-center gap-1 mb-3">
-                  {product.colors.slice(0, 5).map(c => (
+                  {(product.availableColors ?? []).slice(0, 5).map(c => (
                     <div key={c} className="w-3.5 h-3.5 rounded-full border border-gray-200 dark:border-gray-700" style={{ background: c }} />
                   ))}
-                  {product.colors.length > 5 && <span className="text-[10px] text-gray-400">+{product.colors.length - 5}</span>}
+                  {(product.availableColors ?? []).length > 5 && <span className="text-[10px] text-gray-400">+{product.availableColors.length - 5}</span>}
                 </div>
                 <div className="flex items-center justify-between mt-auto">
                   <div>
-                    <p className="text-base font-black text-gray-900 dark:text-white">{formatINR(product.price)}</p>
+                    <p className="text-base font-black text-gray-900 dark:text-white">{formatINR(product.effectivePrice)}</p>
                     <p className="text-[10px] text-gray-400">per piece</p>
                   </div>
                   <button onClick={() => setConfigProduct(product)} className="btn-primary py-1.5 px-3 text-xs flex items-center gap-1">

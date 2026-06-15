@@ -73,6 +73,16 @@ export default function CreateId({ role }: Props) {
     if (!formData.gender) newErrors.gender = 'Please select a gender'
     if (!formData.password) newErrors.password = 'Password is required'
     else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters'
+    else {
+      const pwd = formData.password
+      const hasUpper = /[A-Z]/.test(pwd)
+      const hasLower = /[a-z]/.test(pwd)
+      const hasDigit = /\d/.test(pwd)
+      const hasSpecial = /[^A-Za-z0-9]/.test(pwd)
+      if (!hasUpper || !hasLower || !hasDigit || !hasSpecial) {
+        newErrors.password = 'Must include uppercase, lowercase, digit, and special character'
+      }
+    }
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm the password'
     else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match'
     setErrors(newErrors)
@@ -274,6 +284,7 @@ export default function CreateId({ role }: Props) {
                 </button>
               </div>
               {errors.password && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={12} />{errors.password}</p>}
+              <p className="mt-1 text-[10px] text-gray-400">Min 8 chars, with uppercase, lowercase, digit &amp; special character</p>
             </div>
 
             {/* Confirm Password */}
