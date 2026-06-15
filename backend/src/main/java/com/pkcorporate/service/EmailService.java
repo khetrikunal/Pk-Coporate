@@ -94,6 +94,7 @@ public class EmailService {
         sendHtmlEmail(toEmail, "Payment Received: " + orderNumber, html);
     }
 
+    @Async
     public void sendWelcomeEmail(String toEmail, String name, String tempPassword, String role) {
         String html = """
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
